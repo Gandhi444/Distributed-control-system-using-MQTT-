@@ -8,7 +8,7 @@
 #ifndef INC_MLX90614_H_
 #define INC_MLX90614_H_
 
-#include "crc.h"
+#include "main.h"
 #include <stdio.h>
 #include "stdbool.h"
 #include "math.h"
@@ -20,6 +20,7 @@
 #define MLX90614_TOBJ 0x07
 #define MLX90614_EMISS 0x04
 #define MLX90614_EMISS_CALIBRATION 0x0F
+
 typedef struct{
 	uint8_t addres;
 	float temp;
