@@ -17,10 +17,8 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <MLX90614.h>
 #include "main.h"
 #include "crc.h"
-#include "eth.h"
 #include "i2c.h"
 #include "usart.h"
 #include "usb_otg.h"
@@ -28,6 +26,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include "MLX90614.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,7 +47,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+MLX90614_typedef MLX90614_inst;
+uint32_t len;
+char msg[50];
+uint16_t test;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,19 +92,29 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ETH_Init();
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
   MX_CRC_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-
+  MLX90614_Init(&MLX90614_inst, &hi2c1, &hcrc);
+  //test=(uint8_t)MLX90614_Set_Emisivity(0.98, &MLX90614_inst);
+  MLX90614_Write_Eeprom(0x04, 0, &MLX90614_inst);
+  HAL_Delay(100);
+  MLX90614_ReadEprom(0x04, &test, &MLX90614_inst);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  MLX90614_Amb_Temp(&MLX90614_inst);
+//	  uint8_t Crc;
+//	  uint8_t crcbuf[4]={0x12,0x22,0x02,0x06};
+//	  Crc=HAL_CRC_Calculate(&hcrc, (uint32_t*)crcbuf, 4);
+	  len=sprintf(msg,"%u,%.2f \r\n",test,MLX90614_inst.amb_temp);
+	  HAL_UART_Transmit(&huart3, (uint8_t *)msg, len, 10);
+	  HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
