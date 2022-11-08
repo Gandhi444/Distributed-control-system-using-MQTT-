@@ -20,7 +20,6 @@ bool BH1750_init(BH1750_typedef *BH1750) {
 	}
 	return true;
 }
-;
 bool BH1750_ReadIlluminance_lux(BH1750_typedef *BH1750) {
 	uint8_t read_buf[2];
 	if (HAL_I2C_Master_Receive(BH1750->hi2c, BH1750->Address, read_buf, 2, 1000)== HAL_OK)
