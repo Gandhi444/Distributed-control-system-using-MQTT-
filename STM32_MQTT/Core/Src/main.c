@@ -20,13 +20,16 @@
 #include "main.h"
 #include "crc.h"
 #include "i2c.h"
+#include "lwip.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_otg.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
+#include "lwip/apps/mqtt.h"
+#include "lwip_mqtt.h"
 #include "MLX90614.h"
 /* USER CODE END Includes */
 
@@ -47,10 +50,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-MLX90614_typedef MLX90614_inst;
-uint32_t len;
-char msg[50];
-uint16_t test;
+mqtt_client_t *client;
+uint32_t cont=0,blink=0;
+char buf[1000];
+char packet[1000];
+extern struct netif gnetif;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,30 +98,31 @@ int main(void)
   MX_GPIO_Init();
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
+  MX_LWIP_Init();
+  MX_TIM2_Init();
+  MX_UART4_Init();
   MX_CRC_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  MLX90614_Init(&MLX90614_inst, &hi2c1, &hcrc);
-  //test=(uint8_t)MLX90614_Set_Emisivity(0.98, &MLX90614_inst);
-  MLX90614_Write_Eeprom(0x04, 0, &MLX90614_inst);
-  HAL_Delay(100);
-  MLX90614_ReadEprom(0x04, &test, &MLX90614_inst);
+    	  client = mqtt_client_new();
+
+    	  if(client != NULL) {
+    	  sprintf(buf,"Dziala");
+    		example_do_connect(client, "hello_world");
+    	    example_publish(client, buf);
+    	  }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  MLX90614_Amb_Temp(&MLX90614_inst);
-//	  uint8_t Crc;
-//	  uint8_t crcbuf[4]={0x12,0x22,0x02,0x06};
-//	  Crc=HAL_CRC_Calculate(&hcrc, (uint32_t*)crcbuf, 4);
-	  len=sprintf(msg,"%u,%.2f \r\n",test,MLX90614_inst.amb_temp);
-	  HAL_UART_Transmit(&huart3, (uint8_t *)msg, len, 10);
-	  HAL_Delay(500);
+	  MX_LWIP_Process();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
   }
   /* USER CODE END 3 */
 }
@@ -172,7 +177,20 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+if (htim->Instance==TIM2){
+	cont++;
+	if(cont>500000){
+		blink++;
+		sprintf(packet,"we blink green led %d times",(int)blink);
+		cont=0;
+		    example_do_connect(client, "hello_world");
+		 example_publish(client, packet);
 
+	}
+}
+}
 /* USER CODE END 4 */
 
 /**
