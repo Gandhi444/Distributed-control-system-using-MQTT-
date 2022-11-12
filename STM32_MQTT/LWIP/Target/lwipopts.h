@@ -30,7 +30,14 @@
 
 /* Within 'USER CODE' section, code will be kept by default at each generation */
 /* USER CODE BEGIN 0 */
+void sntp_set_system_time_us(u32_t t, u32_t us)
+{
+	struct tm *time;
+	RTC_TimeTypeDef sTime = 0;
+	RTC_DateTupeDef sDate = 0;
 
+}
+#define SNTP_SET_SYSTEM_TIME_US sntp_set_time;
 /* USER CODE END 0 */
 
 #ifdef __cplusplus
@@ -75,6 +82,8 @@
 #define LWIP_SOCKET 0
 /*----- Value in opt.h for RECV_BUFSIZE_DEFAULT: INT_MAX -----*/
 #define RECV_BUFSIZE_DEFAULT 2000000000
+/*----- Default Value for LWIP_SNTP: 0 ---*/
+#define LWIP_SNTP 1
 /*----- Value in opt.h for LWIP_STATS: 1 -----*/
 #define LWIP_STATS 0
 /*----- Value in opt.h for CHECKSUM_GEN_IP: 1 -----*/
