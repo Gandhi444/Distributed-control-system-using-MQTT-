@@ -32,6 +32,7 @@
 #include "lwip/apps/mqtt.h"
 #include "lwip_mqtt.h"
 #include "MLX90614.h"
+#include "BH1750.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,7 +56,10 @@ mqtt_client_t *client;
 uint32_t cont=0,blink=0;
 char buf[1000];
 char packet[1000];
+int len=0;
 extern struct netif gnetif;
+BH1750_typedef BH1750;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,20 +105,17 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_LWIP_Init();
   MX_TIM2_Init();
-  MX_UART4_Init();
   MX_CRC_Init();
   MX_I2C1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  sntp_setoperatingmode(SNTP_OPMODE_POLL);
-  sntp_setservername(0, "pool.ntp.org");
-  sntp_init();
+  //BH1750_init(&BH1750);
     	  client = mqtt_client_new();
 
     	  if(client != NULL) {
     	  sprintf(buf,"Dziala");
-    		example_do_connect(client, "hello_world");
-    	    example_publish(client, buf);
+    		//example_do_connect(client, "hello_world");
+    	    //example_publish(client, buf);
     	  }
 
   /* USER CODE END 2 */
@@ -124,6 +125,10 @@ int main(void)
   while (1)
   {
 	  MX_LWIP_Process();
+	  //BH1750_ReadIlluminance_lux(&BH1750);
+	  //HAL_Delay(500);
+	  //len=sprintf(buf,"%f\n\r",BH1750.Iluminance);
+	  //HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -12,6 +12,7 @@
 #include "stdbool.h"
 #include "math.h"
 #include "main.h"
+extern I2C_HandleTypeDef hi2c1;
 
 typedef struct{
 	uint8_t Address;

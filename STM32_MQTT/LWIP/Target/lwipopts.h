@@ -30,14 +30,9 @@
 
 /* Within 'USER CODE' section, code will be kept by default at each generation */
 /* USER CODE BEGIN 0 */
-void sntp_set_system_time_us(u32_t t, u32_t us)
-{
-	struct tm *time;
-	RTC_TimeTypeDef sTime = 0;
-	RTC_DateTupeDef sDate = 0;
+#include "sntp_rtc.h"
+#define SNTP_SET_SYSTEM_TIME_US(sec, us) SetRTC(sec,us)
 
-}
-#define SNTP_SET_SYSTEM_TIME_US sntp_set_time;
 /* USER CODE END 0 */
 
 #ifdef __cplusplus
