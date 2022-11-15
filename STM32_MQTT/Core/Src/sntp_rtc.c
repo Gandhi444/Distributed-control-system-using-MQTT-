@@ -17,6 +17,7 @@ void SetRTC(uint64_t* seconds,uint64_t* us)
 	rtc_time.Hours=sntp_clock.tm_hour;
 	rtc_time.Minutes=sntp_clock.tm_min;
 	rtc_time.Seconds=sntp_clock.tm_sec;
+	rtc_time.DayLightSaving=(sntp_clock.tm_isdst)? RTC_DAYLIGHTSAVING_ADD1H : RTC_DAYLIGHTSAVING_NONE;
 	//rtc_time.SubSeconds=us;
 	//rtc_time.SecondFraction=999999;
 	HAL_RTC_SetTime(&hrtc, &rtc_time, RTC_FORMAT_BIN);

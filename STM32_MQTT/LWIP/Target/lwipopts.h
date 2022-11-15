@@ -30,7 +30,12 @@
 
 /* Within 'USER CODE' section, code will be kept by default at each generation */
 /* USER CODE BEGIN 0 */
+#define LWIP_DEBUG 0
 #include "sntp_rtc.h"
+//void print_debug(const uint8_t *pData)
+//{
+//	HAL_UART_Transmit(&huart3, pData, len, 1000);
+//}
 #define SNTP_SET_SYSTEM_TIME_US(sec, us) SetRTC(sec,us)
 
 /* USER CODE END 0 */

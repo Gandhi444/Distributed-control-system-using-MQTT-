@@ -31,6 +31,7 @@
 /* USER CODE BEGIN Includes */
 #include "lwip/apps/mqtt.h"
 #include "lwip_mqtt.h"
+#include "lwip/apps/sntp.h"
 #include "MLX90614.h"
 #include "BH1750.h"
 /* USER CODE END Includes */
@@ -56,8 +57,10 @@ mqtt_client_t *client;
 uint32_t cont=0,blink=0;
 char buf[1000];
 char packet[1000];
-int len=0;
+uint16_t len=0;
 extern struct netif gnetif;
+RTC_TimeTypeDef RTC_time;
+RTC_DateTypeDef RTC_date;
 BH1750_typedef BH1750;
 
 /* USER CODE END PV */
@@ -65,7 +68,15 @@ BH1750_typedef BH1750;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, 0xFFFF);
 
+  return ch;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -109,7 +120,13 @@ int main(void)
   MX_I2C1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
+  putenv("TZ=GMT-01:00");
   //BH1750_init(&BH1750);
+  ip_addr_t sntp_server_ip;
+  IP4_ADDR(&sntp_server_ip,162,159,200,1);
+  sntp_setserver(0, &sntp_server_ip);
+  sntp_setoperatingmode(SNTP_OPMODE_POLL);
+  sntp_init();
     	  client = mqtt_client_new();
 
     	  if(client != NULL) {
@@ -122,13 +139,23 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int i=0;
   while (1)
   {
 	  MX_LWIP_Process();
 	  //BH1750_ReadIlluminance_lux(&BH1750);
-	  //HAL_Delay(500);
+	  HAL_Delay(10);
 	  //len=sprintf(buf,"%f\n\r",BH1750.Iluminance);
 	  //HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 10);
+	  if(i==600)
+	  {
+	  HAL_RTC_GetTime(&hrtc, &RTC_time, RTC_FORMAT_BIN);
+	  HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
+	  len=sprintf(buf,"h:%d,m:%d,s:%d\n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds);
+	  HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
+	  i=0;
+	  }
+	  i++;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -149,6 +176,7 @@ void SystemClock_Config(void)
   /** Configure LSE Drive Capability
   */
   HAL_PWR_EnableBkUpAccess();
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
 
   /** Configure the main internal regulator output voltage
   */
@@ -158,9 +186,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
