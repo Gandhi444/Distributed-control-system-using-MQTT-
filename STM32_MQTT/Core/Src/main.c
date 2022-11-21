@@ -100,7 +100,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  putenv("TZ=GMT-01:00");
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -109,7 +109,6 @@ int main(void)
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
-
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
@@ -120,7 +119,6 @@ int main(void)
   MX_I2C1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  putenv("TZ=GMT-01:00");
   //BH1750_init(&BH1750);
   ip_addr_t sntp_server_ip;
   IP4_ADDR(&sntp_server_ip,162,159,200,1);
@@ -151,7 +149,8 @@ int main(void)
 	  {
 	  HAL_RTC_GetTime(&hrtc, &RTC_time, RTC_FORMAT_BIN);
 	  HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
-	  len=sprintf(buf,"h:%d,m:%d,s:%d\n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds);
+	  float miliseconds = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
+	  len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f \n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds);
 	  HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 	  i=0;
 	  }

@@ -12,6 +12,6 @@
 
 extern RTC_HandleTypeDef hrtc;
 
-void SetRTC(uint64_t* seconds,uint64_t* ms);
+void SetRTC(uint64_t seconds,uint64_t ms);
 
 #endif /* INC_SNTP_RTC_H_ */
