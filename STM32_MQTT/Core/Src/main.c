@@ -21,6 +21,7 @@
 #include "crc.h"
 #include "i2c.h"
 #include "lwip.h"
+#include "rtc.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_otg.h"
@@ -30,7 +31,9 @@
 /* USER CODE BEGIN Includes */
 #include "lwip/apps/mqtt.h"
 #include "lwip_mqtt.h"
+#include "lwip/apps/sntp.h"
 #include "MLX90614.h"
+#include "BH1750.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,13 +57,26 @@ mqtt_client_t *client;
 uint32_t cont=0,blink=0;
 char buf[1000];
 char packet[1000];
+uint16_t len=0;
 extern struct netif gnetif;
+RTC_TimeTypeDef RTC_time;
+RTC_DateTypeDef RTC_date;
+BH1750_typedef BH1750;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, 0xFFFF);
 
+  return ch;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -84,7 +100,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  putenv("TZ=GMT-01:00");
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -93,32 +109,52 @@ int main(void)
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
-
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
   MX_LWIP_Init();
   MX_TIM2_Init();
-  MX_UART4_Init();
   MX_CRC_Init();
   MX_I2C1_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
+  //BH1750_init(&BH1750);
+  ip_addr_t sntp_server_ip;
+  IP4_ADDR(&sntp_server_ip,162,159,200,1);
+  sntp_setserver(0, &sntp_server_ip);
+  sntp_setoperatingmode(SNTP_OPMODE_POLL);
+  sntp_init();
     	  client = mqtt_client_new();
 
     	  if(client != NULL) {
     	  sprintf(buf,"Dziala");
-    		example_do_connect(client, "hello_world");
-    	    example_publish(client, buf);
+    		//example_do_connect(client, "hello_world");
+    	    //example_publish(client, buf);
     	  }
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int i=0;
   while (1)
   {
 	  MX_LWIP_Process();
+	  //BH1750_ReadIlluminance_lux(&BH1750);
+	  HAL_Delay(10);
+	  //len=sprintf(buf,"%f\n\r",BH1750.Iluminance);
+	  //HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 10);
+	  if(i==100)
+	  {
+	  HAL_RTC_GetTime(&hrtc, &RTC_time, RTC_FORMAT_BIN);
+	  HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
+	  float miliseconds = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
+	  len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f \n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds);
+	  HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
+	  i=0;
+	  }
+	  i++;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -139,6 +175,7 @@ void SystemClock_Config(void)
   /** Configure LSE Drive Capability
   */
   HAL_PWR_EnableBkUpAccess();
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
 
   /** Configure the main internal regulator output voltage
   */
@@ -148,8 +185,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;

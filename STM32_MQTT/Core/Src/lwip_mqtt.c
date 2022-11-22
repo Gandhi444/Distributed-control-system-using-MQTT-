@@ -9,7 +9,7 @@
 #include <string.h>
 #include "stm32f7xx_hal.h"
 
-extern UART_HandleTypeDef huart4;
+extern UART_HandleTypeDef huart3;
 char buffer[1000];
 /* The idea is to demultiplex topic and create some reference to be used in data callbacks
    Example here uses a global variable, better would be to use a member in arg
@@ -20,7 +20,7 @@ static int inpub_id;
 static void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len)
 {
   sprintf(buffer,"Incoming publish at topic %s with total length %u\n\r", topic, (unsigned int)tot_len);
-HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
   /* Decode topic string into a user defined reference */
   if(strcmp(topic, "print_payload") == 0) {
     inpub_id = 0;
@@ -38,7 +38,7 @@ HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
 static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags)
 {
 	  sprintf(buffer,"Incoming publish payload with length %d, flags %u\n\r", len, (unsigned int)flags);
-	  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
 
   if(flags & MQTT_DATA_FLAG_LAST) {
     /* Last fragment of payload received (or whole part if payload fits receive buffer
@@ -49,11 +49,11 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
       /* Don't trust the publisher, check zero termination */
       if(data[len-1] == 0) {
     	  sprintf(buffer,"mqtt_incoming_data_cb: %s\n\r", (const char *)data);
-    	  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+    	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
       }
  else {
       sprintf(buffer,"mqtt_incoming_data_cb: Ignoring payload...\n\r");
-	  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);}
+	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);}
 	}
 	}
 }
@@ -69,7 +69,7 @@ static void mqtt_sub_request_cb(void *arg, err_t result)
      normal behaviour would be to take some action if subscribe fails like
      notifying user, retry subscribe or disconnect from server */
   sprintf(buffer,"Subscribe result: %d\n\r", result);
-  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
 
 }
 
@@ -79,7 +79,7 @@ static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection
   err_t err;
   if(status == MQTT_CONNECT_ACCEPTED) {
     sprintf(buffer,"mqtt_connection_cb: Successfully connected\n");
-	  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
 
     /* Setup callback for incoming publish requests */
     mqtt_set_inpub_callback(client, mqtt_incoming_publish_cb, mqtt_incoming_data_cb, arg);
@@ -89,12 +89,12 @@ static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection
 
     if(err != ERR_OK) {
       sprintf(buffer,"mqtt_subscribe return: %d\n", err);
-	  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
 
     }
   } else {
     sprintf(buffer,"mqtt_connection_cb: Disconnected, reason: %d\n", status);
-	  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
 
     /* Its more nice to be connected, so try to reconnect */
     example_do_connect(client);
@@ -126,7 +126,7 @@ void example_do_connect(mqtt_client_t *client, const char *topic)
   /* For now just print the result code if something goes wrong */
   if(err != ERR_OK) {
     sprintf(buffer,"mqtt_connect return %d\n\r", err);
-	  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
   }
 }
 
@@ -135,7 +135,7 @@ static void mqtt_pub_request_cb(void *arg, err_t result)
 {
   if(result != ERR_OK) {
     sprintf(buffer,"Publish result: %d\n", result);
-	  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
   }
 }
 void example_publish(mqtt_client_t *client, void *arg)
@@ -147,7 +147,7 @@ void example_publish(mqtt_client_t *client, void *arg)
   err = mqtt_publish(client, "hello_world", pub_payload, strlen(pub_payload), qos, retain, mqtt_pub_request_cb, arg);
   if(err != ERR_OK) {
     sprintf(buffer,"Publish err: %d\n\r", err);
-	  HAL_UART_Transmit(&huart4,buffer,strlen(buffer),1000);
+	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
   }
 }
 
