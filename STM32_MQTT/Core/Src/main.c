@@ -145,7 +145,7 @@ int main(void)
 	  HAL_Delay(10);
 	  //len=sprintf(buf,"%f\n\r",BH1750.Iluminance);
 	  //HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 10);
-	  if(i==600)
+	  if(i==100)
 	  {
 	  HAL_RTC_GetTime(&hrtc, &RTC_time, RTC_FORMAT_BIN);
 	  HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);

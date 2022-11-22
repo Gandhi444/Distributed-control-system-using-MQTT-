@@ -9,11 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 time_t sntp_time;
-//extern UART_HandleTypeDef huart3;
 void SetRTC(uint64_t seconds,uint64_t us)
 {
-	//char buf[1000];
-
 	RTC_TimeTypeDef rtc_time;
 	RTC_DateTypeDef rtc_date;
 	struct tm sntp_clock;
@@ -36,16 +33,11 @@ void SetRTC(uint64_t seconds,uint64_t us)
 	HAL_RTC_GetTime(&hrtc, &rtc_time, RTC_FORMAT_BIN);
 	uint32_t us_rtc = (rtc_time.SecondFraction-rtc_time.SubSeconds)/((float)rtc_time.SecondFraction+1)*1000000;
 	int us_offset=us-us_rtc;
-	if(us_offset>0)
+	if(us_offset<0)
 	{	HAL_RTCEx_SetSynchroShift(&hrtc,RTC_SHIFTADD1S_RESET,(256*abs(us_offset)/1000000));
-		//hrtc.Instance->SHIFTR=(256*abs(us_offset)/1000000);
 	}else
 	{
 		HAL_RTCEx_SetSynchroShift(&hrtc,RTC_SHIFTADD1S_SET,256-(256*us_offset/1000000));
-		//hrtc.Instance->SHIFTR=256-(256*us_offset/1000000);
 	}
-
-	//int len=sprintf(buf,"\n\r sntp_time h:%d,m:%d,s:%d\n\r",sntp_clock.tm_hour,sntp_clock.tm_min,sntp_clock.tm_sec);
-	//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 }
 
