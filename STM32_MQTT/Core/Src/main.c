@@ -137,6 +137,10 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_StatusTypeDef  ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50);
+  int state=ret;
+  len=sprintf(buf,"%d",state);
+  HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
   int i=0;
   while (1)
   {
@@ -151,7 +155,7 @@ int main(void)
 	  HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
 	  float miliseconds = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
 	  len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f \n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds);
-	  HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
+	  //HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 	  i=0;
 	  }
 	  i++;
