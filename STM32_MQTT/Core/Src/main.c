@@ -34,6 +34,7 @@
 #include "lwip/apps/sntp.h"
 #include "MLX90614.h"
 #include "BH1750.h"
+#include "BMP280.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,7 +63,7 @@ extern struct netif gnetif;
 RTC_TimeTypeDef RTC_time;
 RTC_DateTypeDef RTC_date;
 BH1750_typedef BH1750;
-
+BMP280_typedef BMP280;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,6 +110,7 @@ int main(void)
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
+
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
@@ -118,8 +120,11 @@ int main(void)
   MX_CRC_Init();
   MX_I2C1_Init();
   MX_RTC_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
   //BH1750_init(&BH1750);
+  BMP280_initDefParams(&BMP280);
+  BMP280_init(&BMP280);
   ip_addr_t sntp_server_ip;
   IP4_ADDR(&sntp_server_ip,162,159,200,1);
   sntp_setserver(0, &sntp_server_ip);
@@ -137,10 +142,10 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_StatusTypeDef  ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50);
-  int state=ret;
-  len=sprintf(buf,"%d",state);
-  HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
+  //HAL_StatusTypeDef  ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50);
+ // int state=ret;
+  //len=sprintf(buf,"%d",state);
+  //HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
   int i=0;
   while (1)
   {
@@ -149,13 +154,15 @@ int main(void)
 	  HAL_Delay(10);
 	  //len=sprintf(buf,"%f\n\r",BH1750.Iluminance);
 	  //HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 10);
+	  BMP280ReadTemp(&BMP280);
 	  if(i==100)
 	  {
 	  HAL_RTC_GetTime(&hrtc, &RTC_time, RTC_FORMAT_BIN);
 	  HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
 	  float miliseconds = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
-	  len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f \n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds);
-	  //HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
+	  //len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f \n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds);
+	  len=sprintf(buf,"%f\n\r",BMP280.temp);
+	  HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 	  i=0;
 	  }
 	  i++;
