@@ -112,14 +112,14 @@ void example_do_connect(mqtt_client_t *client, const char *topic)
   memset(&ci, 0, sizeof(ci));
 
   /* Minimal amount of information required is client identifier, so set it here */
-  ci.client_id = "mqtt";
+  ci.client_id = "kompdom";
   ci.keep_alive = 50000;
   /* Initiate client and connect to server, if this fails immediately an error code is returned
      otherwise mqtt_connection_cb will be called with connection result after attempting
      to establish a connection with the server.
      For now MQTT version 3.1.1 is always used */
   ip_addr_t mqttServerIP;
-  IP4_ADDR(&mqttServerIP, 192, 168, 113, 4);
+  IP4_ADDR(&mqttServerIP, 192, 168, 137, 1);
 //err = mqtt_client_connect(client, &mqttServerIP, MQTT_PORT, mqtt_connection_cb, 0, &ci);
   err = mqtt_client_connect(client, &mqttServerIP, MQTT_PORT, mqtt_connection_cb, topic, &ci);
 
