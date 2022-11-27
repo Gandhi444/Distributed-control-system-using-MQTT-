@@ -132,7 +132,7 @@ int main(void) {
 	if (client != NULL) {
 		sprintf(buf, "Dziala");
 		example_do_connect(client, "hello_world");
-		example_publish(client, buf);
+		//example_publish(client, buf);
 	}
 	HAL_TIM_Base_Start_IT(&htim2);
 	/* USER CODE END 2 */
@@ -147,17 +147,17 @@ int main(void) {
 	while (1) {
 		MX_LWIP_Process();
 		//BH1750_ReadIlluminance_lux(&BH1750);
-		//HAL_Delay(10);
+		HAL_Delay(10);
 		//len=sprintf(buf,"%f\n\r",BH1750.Iluminance);
 		//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 10);
-		BMP280ReadTemp(&BMP280);
+		//BMP280ReadTemp(&BMP280);
 		if (i == 100) {
 			//HAL_RTC_GetTime(&hrtc, &RTC_time, RTC_FORMAT_BIN);
 			//HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
 			//float miliseconds = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
 			//len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f \n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds);
 			len = sprintf(buf, "%f\n\r", BMP280.temp);
-			//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
+			HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 			i = 0;
 		}
 		i++;
@@ -223,14 +223,14 @@ void SystemClock_Config(void) {
 //{
 //if (htim->Instance==TIM2){
 //	cont++;
-//	if(cont>500000){
+//	//if(cont>500000){
 //		blink++;
 //		sprintf(packet,"we blink green led %d times",(int)blink);
 //		cont=0;
-//		    example_do_connect(client, "hello_world");
+//		 //example_do_connect(client, "hello_world");
 //		 example_publish(client, packet);
 //
-//	}
+//	//}
 //}
 //}
 /* USER CODE END 4 */
