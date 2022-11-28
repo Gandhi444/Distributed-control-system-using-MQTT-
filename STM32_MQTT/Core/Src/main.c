@@ -56,6 +56,7 @@
 /* USER CODE BEGIN PV */
 mqtt_client_t *client;
 uint32_t cont = 0, blink = 0;
+uint8_t mode = 0;
 char buf[1000];
 char packet[1000];
 uint16_t len = 0;
@@ -120,34 +121,41 @@ int main(void) {
 	MX_RTC_Init();
 	/* USER CODE BEGIN 2 */
 	//BH1750_init(&BH1750);
-	BMP280_initDefParams(&BMP280);
-	BMP280_init(&BMP280);
+
+	client = mqtt_client_new();
+	/* USER CODE END 2 */
+
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
+	HAL_StatusTypeDef ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50);
+	//example_do_connect(client, "hello_world");
+	mode = ret + 1;
+	if (mode == 1) {
+		BMP280_initDefParams(&BMP280);
+		BMP280_init(&BMP280);
+		if (client != NULL) {
+			example_do_connect(client, "Sensors");
+		}
+	} else {
+		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+		if (client != NULL) {
+			example_do_connect(client, "Control");
+		}
+	}
 	ip_addr_t sntp_server_ip;
 	IP4_ADDR(&sntp_server_ip, 162, 159, 200, 1);
 	sntp_setserver(0, &sntp_server_ip);
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
 	sntp_init();
-	client = mqtt_client_new();
-
-	if (client != NULL) {
-		sprintf(buf, "Dziala");
-		example_do_connect(client, "hello_world");
-		//example_publish(client, buf);
-	}
 	HAL_TIM_Base_Start_IT(&htim2);
-	/* USER CODE END 2 */
 
-	/* Infinite loop */
-	/* USER CODE BEGIN WHILE */
-	//HAL_StatusTypeDef  ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50);
-	// int state=ret;
 	//len=sprintf(buf,"%d",state);
 	//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 	int i = 0;
 	while (1) {
 		MX_LWIP_Process();
 		//BH1750_ReadIlluminance_lux(&BH1750);
-		HAL_Delay(10);
+		//HAL_Delay(10);
 		//len=sprintf(buf,"%f\n\r",BH1750.Iluminance);
 		//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 10);
 		//BMP280ReadTemp(&BMP280);
@@ -156,8 +164,8 @@ int main(void) {
 			//HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
 			//float miliseconds = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
 			//len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f \n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds);
-			len = sprintf(buf, "%f\n\r", BMP280.temp);
-			HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
+			//len = sprintf(buf, "%f\n\r", BMP280.temp);
+			//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 			i = 0;
 		}
 		i++;

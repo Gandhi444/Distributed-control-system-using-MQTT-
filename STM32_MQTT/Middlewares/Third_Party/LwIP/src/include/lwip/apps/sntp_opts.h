@@ -79,7 +79,7 @@
  * SNTP_DEBUG: Enable debugging for SNTP.
  */
 #if !defined SNTP_DEBUG || defined __DOXYGEN__
-#define SNTP_DEBUG                  LWIP_DBG_ON
+#define SNTP_DEBUG                  LWIP_DBG_OFF
 #endif
 
 /** SNTP server port */

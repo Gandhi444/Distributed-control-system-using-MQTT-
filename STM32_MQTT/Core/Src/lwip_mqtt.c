@@ -20,7 +20,7 @@ static int inpub_id;
 static void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len)
 {
   sprintf(buffer,"Incoming publish at topic %s with total length %u\n\r", topic, (unsigned int)tot_len);
-HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
+  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
   /* Decode topic string into a user defined reference */
   if(strcmp(topic, "print_payload") == 0) {
     inpub_id = 0;
@@ -32,6 +32,11 @@ HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
     /* For all other topics */
     inpub_id = 9;
   }
+//  if(*topic=="Control")
+//  {
+//	  sprintf(buffer,"tak %s\n\r", topic);
+//	  HAL_UART_Transmit(&huart3,(uint8_t*)buffer,strlen(buffer),1000);
+//  }
 
 }
 
@@ -119,7 +124,7 @@ void example_do_connect(mqtt_client_t *client, const char *topic)
      to establish a connection with the server.
      For now MQTT version 3.1.1 is always used */
   ip_addr_t mqttServerIP;
-  IP4_ADDR(&mqttServerIP, 192, 168, 137, 1);
+  IP4_ADDR(&mqttServerIP, 192, 168, 0, 23);
 //err = mqtt_client_connect(client, &mqttServerIP, MQTT_PORT, mqtt_connection_cb, 0, &ci);
   err = mqtt_client_connect(client, &mqttServerIP, MQTT_PORT, mqtt_connection_cb, topic, &ci);
 
@@ -138,13 +143,13 @@ static void mqtt_pub_request_cb(void *arg, err_t result)
 	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
   }
 }
-void example_publish(mqtt_client_t *client, void *arg)
+void example_publish(mqtt_client_t *client, const char *topic,void *arg )
 {
   const char *pub_payload= arg;
   err_t err;
   u8_t qos = 2;
   u8_t retain = 0;
-  err = mqtt_publish(client, "hello_world", pub_payload, strlen(pub_payload), qos, retain, mqtt_pub_request_cb, arg);
+  err = mqtt_publish(client, topic, pub_payload, strlen(pub_payload), qos, retain, mqtt_pub_request_cb, arg);
   if(err != ERR_OK) {
     sprintf(buffer,"Publish err: %d\n\r", err);
 	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
