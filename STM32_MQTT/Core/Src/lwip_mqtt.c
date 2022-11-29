@@ -8,9 +8,11 @@
 #include "lwip/apps/mqtt.h"
 #include <string.h>
 #include "stm32f7xx_hal.h"
-
+#include "tim.h"
 extern UART_HandleTypeDef huart3;
 char buffer[1000];
+extern char topic[50];
+extern char client_id[50];
 /* The idea is to demultiplex topic and create some reference to be used in data callbacks
    Example here uses a global variable, better would be to use a member in arg
    If RAM and CPU budget allows it, the easiest implementation might be to just take a copy of
@@ -21,22 +23,21 @@ static void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len
 {
   sprintf(buffer,"Incoming publish at topic %s with total length %u\n\r", topic, (unsigned int)tot_len);
   HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
-  /* Decode topic string into a user defined reference */
-  if(strcmp(topic, "print_payload") == 0) {
-    inpub_id = 0;
-  } else if(topic[0] == 'A') {
-    /* All topics starting with 'A' might be handled at the same way */
-    inpub_id = 1;
-  }
-  else {
-    /* For all other topics */
-    inpub_id = 9;
-  }
-//  if(*topic=="Control")
-//  {
-//	  sprintf(buffer,"tak %s\n\r", topic);
-//	  HAL_UART_Transmit(&huart3,(uint8_t*)buffer,strlen(buffer),1000);
+//  /* Decode topic string into a user defined reference */
+//  if(strcmp(topic, "print_payload") == 0) {
+//    inpub_id = 0;
+//  } else if(topic[0] == 'A') {
+//    /* All topics starting with 'A' might be handled at the same way */
+//    inpub_id = 1;
 //  }
+//  else {
+//    /* For all other topics */
+//    inpub_id = 9;
+//  }
+  if(strcmp(topic, "Control") == 0)
+  {
+	  inpub_id=1;
+  }
 
 }
 
@@ -45,22 +46,34 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
 	  sprintf(buffer,"Incoming publish payload with length %d, flags %u\n\r", len, (unsigned int)flags);
 	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
 
-  if(flags & MQTT_DATA_FLAG_LAST) {
+  //if(flags & MQTT_DATA_FLAG_LAST) {
     /* Last fragment of payload received (or whole part if payload fits receive buffer
        See MQTT_VAR_HEADER_BUFFER_LEN)  */
 
     /* Call function or do action depending on reference, in this case inpub_id */
-    if(inpub_id == 0) {
-      /* Don't trust the publisher, check zero termination */
-      if(data[len-1] == 0) {
-    	  sprintf(buffer,"mqtt_incoming_data_cb: %s\n\r", (const char *)data);
-    	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
-      }
- else {
-      sprintf(buffer,"mqtt_incoming_data_cb: Ignoring payload...\n\r");
-	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);}
-	}
-	}
+//    if(inpub_id == 1) {
+//      /* Don't trust the publisher, check zero termination */
+//      if(data[len-1] == 0) {
+//    	  sprintf(buffer,"mqtt_incoming_data_cb: %s\n\r", (const char *)data);
+//    	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
+//    	  int nr;
+//    	  sscanf((char)data,"test:%d",nr);
+//    	  sprintf(buffer,"%d", nr);
+//    	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
+//      }
+//      else {
+//      sprintf(buffer,"mqtt_incoming_data_cb: Ignoring payload...\n\r");
+//	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);}
+//	}
+	//}
+	  if(inpub_id == 1) {
+		  float u;
+		  //sscanf (data,"{\"u\":%d}",&u);
+		  sscanf (data,"%f",&u);
+		  sprintf(buffer,"%f\n\r", u);
+		  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
+		  __HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_3,u);
+	  }
 }
 
 
@@ -102,7 +115,7 @@ static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection
 	  HAL_UART_Transmit(&huart3,buffer,strlen(buffer),1000);
 
     /* Its more nice to be connected, so try to reconnect */
-    example_do_connect(client);
+    example_do_connect(client,topic);
   }
 
 }
@@ -117,7 +130,7 @@ void example_do_connect(mqtt_client_t *client, const char *topic)
   memset(&ci, 0, sizeof(ci));
 
   /* Minimal amount of information required is client identifier, so set it here */
-  ci.client_id = "kompdom";
+  ci.client_id = client_id;
   ci.keep_alive = 50000;
   /* Initiate client and connect to server, if this fails immediately an error code is returned
      otherwise mqtt_connection_cb will be called with connection result after attempting

@@ -16,14 +16,15 @@ extern mqtt_client_t *client;
 extern BMP280_typedef BMP280;
 #include <time.h>
 extern uint8_t mode;
+int i=0;
 void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef * htim)
 {
+	uint16_t len=0;
+	char buf[1000];
 	if(htim->Instance==TIM2)
 	{
 		if(mode==1)
 		{
-		char buf[1000];
-		uint16_t len=0;
 		RTC_TimeTypeDef RTC_time;
 		RTC_DateTypeDef RTC_date;
 		BMP280ReadTemp(&BMP280);
@@ -43,6 +44,13 @@ void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef * htim)
 		else
 		{
 
+			if(i==100){
+			int compare=__HAL_TIM_GET_COMPARE(&htim2,TIM_CHANNEL_3);
+			len=sprintf(buf,"compare: %d \n\r", compare);
+			HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
+			i=0;
+			}
+			i++;
 		}
 	}
 }
