@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -34,6 +34,7 @@
 #include "lwip/apps/sntp.h"
 #include "MLX90614.h"
 #include "BH1750.h"
+#include "BMP280.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,29 +55,32 @@
 
 /* USER CODE BEGIN PV */
 mqtt_client_t *client;
-uint32_t cont=0,blink=0;
+uint32_t cont = 0, blink = 0;
+uint8_t mode = 0;
 char buf[1000];
 char packet[1000];
-uint16_t len=0;
+uint16_t len = 0;
 extern struct netif gnetif;
 RTC_TimeTypeDef RTC_time;
 RTC_DateTypeDef RTC_date;
 BH1750_typedef BH1750;
-
+BMP280_typedef BMP280;
+//char topic[50];
+char client_id[50];
+char sub_on_connect[100];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-PUTCHAR_PROTOTYPE
-{
-  /* Place your implementation of fputc here */
-  /* e.g. write a character to the USART1 and Loop until the end of transmission */
-  HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, 0xFFFF);
-
-  return ch;
-}
+//#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+//PUTCHAR_PROTOTYPE {
+//	/* Place your implementation of fputc here */
+//	/* e.g. write a character to the USART1 and Loop until the end of transmission */
+//	HAL_UART_Transmit(&huart3, (uint8_t*) &ch, 1, 0xFFFF);
+//
+//	return ch;
+//}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -100,7 +104,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  putenv("TZ=GMT-01:00");
+	putenv("TZ=GMT-01:00");
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -109,6 +113,7 @@ int main(void)
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
+
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
@@ -119,47 +124,39 @@ int main(void)
   MX_I2C1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  //BH1750_init(&BH1750);
-  ip_addr_t sntp_server_ip;
-  IP4_ADDR(&sntp_server_ip,162,159,200,1);
-  sntp_setserver(0, &sntp_server_ip);
-  sntp_setoperatingmode(SNTP_OPMODE_POLL);
-  sntp_init();
-    	  client = mqtt_client_new();
-
-    	  if(client != NULL) {
-    	  sprintf(buf,"Dziala");
-    		//example_do_connect(client, "hello_world");
-    	    //example_publish(client, buf);
-    	  }
-
+	client = mqtt_client_new();
   /* USER CODE END 2 */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int i=0;
-  while (1)
-  {
-	  MX_LWIP_Process();
-	  //BH1750_ReadIlluminance_lux(&BH1750);
-	  HAL_Delay(10);
-	  //len=sprintf(buf,"%f\n\r",BH1750.Iluminance);
-	  //HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 10);
-	  if(i==100)
-	  {
-	  HAL_RTC_GetTime(&hrtc, &RTC_time, RTC_FORMAT_BIN);
-	  HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
-	  float miliseconds = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
-	  len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f \n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds);
-	  HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
-	  i=0;
-	  }
-	  i++;
+	HAL_StatusTypeDef ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50);
+	mode = ret + 1;
+	if (mode == 1) {
+		BMP280_initDefParams(&BMP280);
+		BMP280_init(&BMP280);
+		sprintf(client_id,"Sensors");
+	} else {
+		sprintf(sub_on_connect,"Control");
+		sprintf(client_id,"Effectors");
+	}
+	if (client != NULL) {
+		example_do_connect(client,sub_on_connect);
+	}
+	ip_addr_t sntp_server_ip;
+	IP4_ADDR(&sntp_server_ip, 162, 159, 200, 1);
+	sntp_setserver(0, &sntp_server_ip);
+	sntp_setoperatingmode(SNTP_OPMODE_POLL);
+	sntp_init();
+	HAL_TIM_Base_Start_IT(&htim2);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+	//__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_3,9999);
+	while (1) {
+		MX_LWIP_Process();
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
-  }
+	}
   /* USER CODE END 3 */
 }
 
@@ -215,20 +212,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-if (htim->Instance==TIM2){
-	cont++;
-	if(cont>500000){
-		blink++;
-		sprintf(packet,"we blink green led %d times",(int)blink);
-		cont=0;
-		    example_do_connect(client, "hello_world");
-		 example_publish(client, packet);
 
-	}
-}
-}
 /* USER CODE END 4 */
 
 /**
@@ -238,11 +222,10 @@ if (htim->Instance==TIM2){
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1) {
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 
