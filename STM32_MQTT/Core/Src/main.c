@@ -65,8 +65,9 @@ RTC_TimeTypeDef RTC_time;
 RTC_DateTypeDef RTC_date;
 BH1750_typedef BH1750;
 BMP280_typedef BMP280;
-char topic[50];
+//char topic[50];
 char client_id[50];
+char sub_on_connect[100];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,27 +124,22 @@ int main(void)
   MX_I2C1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-	//BH1750_init(&BH1750);
 	client = mqtt_client_new();
   /* USER CODE END 2 */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	HAL_StatusTypeDef ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50);
-	//example_do_connect(client, "hello_world");
 	mode = ret + 1;
 	if (mode == 1) {
 		BMP280_initDefParams(&BMP280);
 		BMP280_init(&BMP280);
-		sprintf(topic,"Sensors");
 		sprintf(client_id,"Sensors");
 	} else {
-		//HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-		sprintf(topic,"Control");
+		sprintf(sub_on_connect,"Control");
 		sprintf(client_id,"Effectors");
 	}
 	if (client != NULL) {
-		example_do_connect(client, topic);
+		example_do_connect(client,sub_on_connect);
 	}
 	ip_addr_t sntp_server_ip;
 	IP4_ADDR(&sntp_server_ip, 162, 159, 200, 1);
@@ -152,22 +148,10 @@ int main(void)
 	sntp_init();
 	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-	//len=sprintf(buf,"%d",state);
-	//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
-	int i = 0;
+	//__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_3,9999);
 	while (1) {
 		MX_LWIP_Process();
-		//BMP280ReadTemp(&BMP280);
-		if (i == 100) {
-			//HAL_RTC_GetTime(&hrtc, &RTC_time, RTC_FORMAT_BIN);
-			//HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
-			//float miliseconds = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
-			//len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f \n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds);
-			//len = sprintf(buf, "%f\n\r", BMP280.temp);
-			//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
-			i = 0;
-		}
-		i++;
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -228,20 +212,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-//{
-//if (htim->Instance==TIM2){
-//	cont++;
-//	//if(cont>500000){
-//		blink++;
-//		sprintf(packet,"we blink green led %d times",(int)blink);
-//		cont=0;
-//		 //example_do_connect(client, "hello_world");
-//		 example_publish(client, packet);
-//
-//	//}
-//}
-//}
+
 /* USER CODE END 4 */
 
 /**

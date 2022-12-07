@@ -33,17 +33,17 @@ void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef * htim)
 		float miliseconds = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
 		struct tm brokentime = { RTC_time.Seconds, RTC_time.Minutes,RTC_time.Hours, RTC_date.Date, RTC_date.Month-1, RTC_date.Year+100 };
 		time_t rawtime = mktime(&brokentime);
-
-
 		//len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f temp=%f\n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds,BMP280.temp);
 		len=sprintf(buf,"{\"s\":%ld, \"ms\":%f, \"temp\":%f} \n", rawtime,miliseconds,BMP280.temp);
 		//example_do_connect(client, "hello_world");
+		if(mqtt_client_is_connected(client))
+		{
 		example_publish(client,"Sensors", buf);
+		}
 		//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 		}
 		else
 		{
-
 			if(i==100){
 			int compare=__HAL_TIM_GET_COMPARE(&htim2,TIM_CHANNEL_3);
 			len=sprintf(buf,"compare: %d \n\r", compare);
