@@ -10,6 +10,7 @@
 #include "stm32f7xx_hal.h"
 #include "tim.h"
 #include "lwip_mqtt.h"
+#include <stdint.h>
 extern UART_HandleTypeDef huart3;
 char buffer[1000];
 extern char client_id[50];
@@ -52,7 +53,8 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
 		  sscanf ((char*)data,"%f",&u);
 		  sprintf(buffer,"%f\n\r", u);
 		  HAL_UART_Transmit(&huart3,(uint8_t*)buffer,strlen(buffer),1000);
-		  __HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_3,u);
+		  uint32_t compare=u/100.0*__HAL_TIM_GET_AUTORELOAD(&htim2);
+		  __HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_3,compare);
 	  }
 }
 

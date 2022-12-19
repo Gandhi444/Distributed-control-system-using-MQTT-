@@ -41,3 +41,14 @@ void SetRTC(uint64_t seconds,uint64_t us)
 	}
 }
 
+void GetRTC(time_t* seconds,float* ms)
+{
+	RTC_TimeTypeDef RTC_time;
+	RTC_DateTypeDef RTC_date;
+	HAL_RTC_GetTime(&hrtc, &RTC_time, RTC_FORMAT_BIN);
+	HAL_RTC_GetDate(&hrtc, &RTC_date, RTC_FORMAT_BIN);
+	*ms = (RTC_time.SecondFraction-RTC_time.SubSeconds)/((float)RTC_time.SecondFraction+1);
+	struct tm brokentime = { RTC_time.Seconds, RTC_time.Minutes,RTC_time.Hours, RTC_date.Date, RTC_date.Month-1, RTC_date.Year+100 };
+	*seconds = mktime(&brokentime);
+}
+
