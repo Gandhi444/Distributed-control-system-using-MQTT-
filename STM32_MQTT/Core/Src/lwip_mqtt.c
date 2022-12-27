@@ -25,17 +25,6 @@ static void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len
 {
   sprintf(buffer,"Incoming publish at topic %s with total length %u\n\r", topic, (unsigned int)tot_len);
   HAL_UART_Transmit(&huart3,(uint8_t*)buffer,strlen(buffer),1000);
-//  /* Decode topic string into a user defined reference */
-//  if(strcmp(topic, "print_payload") == 0) {
-//    inpub_id = 0;
-//  } else if(topic[0] == 'A') {
-//    /* All topics starting with 'A' might be handled at the same way */
-//    inpub_id = 1;
-//  }
-//  else {
-//    /* For all other topics */
-//    inpub_id = 9;
-//  }
   if(strcmp(topic, "Control") == 0)
   {
 	  inpub_id=1;
@@ -55,13 +44,9 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
 		  HAL_UART_Transmit(&huart3,(uint8_t*)buffer,strlen(buffer),1000);
 		  uint32_t compare=u/100.0*__HAL_TIM_GET_AUTORELOAD(&htim2);
 		  __HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_3,compare);
+		  inpub_id=0;
 	  }
 }
-
-
-
-
-
 
 static void mqtt_sub_request_cb(void *arg, err_t result)
 {
@@ -88,6 +73,11 @@ static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection
     if(strcmp(topic,"")!=0)
     {
     err = mqtt_subscribe(client, topic, 0, mqtt_sub_request_cb, arg);
+    if(err !=ERR_OK)
+    {
+    printf(buffer,"mqtt_connect return %d\n\r", err);
+    HAL_UART_Transmit(&huart3,(uint8_t*)buffer,strlen(buffer),1000);
+    }
     }
   } else {
     sprintf(buffer,"mqtt_connection_cb: Disconnected, reason: %d\n\r", status);
@@ -121,7 +111,7 @@ void example_do_connect(mqtt_client_t *client,void *arg)
 
   /* Minimal amount of information required is client identifier, so set it here */
   ci.client_id = client_id;
-  ci.keep_alive = 50000;
+  ci.keep_alive = 5;
   /* Initiate client and connect to server, if this fails immediately an error code is returned
      otherwise mqtt_connection_cb will be called with connection result after attempting
      to establish a connection with the server.

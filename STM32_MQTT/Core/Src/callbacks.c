@@ -28,8 +28,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		case Temp: {
 			BMP280ReadTemp(&BMP280);
 			GetRTC(&rawtime, &miliseconds);
-			len = sprintf(buf, "{\"s\":%lld, \"ms\":%f, \"temp\":%f} \n",
+			len = sprintf(buf, "{\"s\":%ld, \"ms\":%f, \"temp\":%f} \n",
 					rawtime, miliseconds, BMP280.temp);
+//			len = sprintf(buf,"%f} \n",
+//					BMP280.temp);
 			if (mqtt_client_is_connected(client)) {
 				example_publish(client, "Sensors", buf);
 			}
@@ -64,7 +66,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 			if (i == 100) {
 			len = sprintf(buf, "somthing went wrong\n\r");
 			HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
-			}
+			i=0;
+			}i++;
 		}
 
 		}
