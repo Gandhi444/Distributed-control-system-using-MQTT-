@@ -61,6 +61,10 @@ char buf[1000];
 char packet[1000];
 uint16_t len = 0;
 extern struct netif gnetif;
+extern uint8_t IP_ADDRESS[4];
+extern ip4_addr_t ipaddr;
+extern ip4_addr_t netmask;
+extern ip4_addr_t gw;
 RTC_TimeTypeDef RTC_time;
 RTC_DateTypeDef RTC_date;
 BH1750_typedef BH1750;
@@ -68,6 +72,7 @@ BMP280_typedef BMP280;
 //char topic[50];
 char client_id[50];
 char sub_on_connect[100];
+enum mode_enum MODE = Not_selected;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,32 +131,52 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	client = mqtt_client_new();
   /* USER CODE END 2 */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	HAL_StatusTypeDef ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50);
-	mode = ret + 1;
-	if (mode == 1) {
+	ip_addr_t sntp_server_ip;
+		IP4_ADDR(&sntp_server_ip, 162, 159, 200, 1);
+		sntp_setserver(0, &sntp_server_ip);
+		sntp_setoperatingmode(SNTP_OPMODE_POLL);
+		sntp_init();
+	if (MODE == Not_selected
+			&& HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50) == 0) {
+		__HAL_TIM_SET_AUTORELOAD(&htim2, 499999);
 		BMP280_initDefParams(&BMP280);
 		BMP280_init(&BMP280);
-		sprintf(client_id,"Sensors");
-	} else {
-		sprintf(sub_on_connect,"Control");
-		sprintf(client_id,"Effectors");
+		MODE = Temp;
+		sprintf(client_id, "Temp");
+		IP_ADDRESS[3] = 5;
 	}
+	if (MODE == Not_selected
+			&& HAL_I2C_IsDeviceReady(&hi2c1, 0x23 << 1, 10, 50) == 0) {
+		__HAL_TIM_SET_AUTORELOAD(&htim2, 19999);
+		BH1750_init(&BH1750);
+		MODE = Light;
+		sprintf(client_id, "Light");
+		IP_ADDRESS[3] = 6;
+	}
+	if (MODE == Not_selected) {
+		__HAL_TIM_SET_AUTORELOAD(&htim2, 19999);
+		sprintf(sub_on_connect, "Control");
+		sprintf(client_id, "Effectors");
+		IP_ADDRESS[3] = 7;
+		MODE = Efector;
+	}
+	IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2],
+			IP_ADDRESS[3]);
+	netif_set_addr(&gnetif, &ipaddr, &netmask, &gw);
 	if (client != NULL) {
-		example_do_connect(client,sub_on_connect);
+		example_do_connect(client, sub_on_connect);
 	}
-	ip_addr_t sntp_server_ip;
-	IP4_ADDR(&sntp_server_ip, 162, 159, 200, 1);
-	sntp_setserver(0, &sntp_server_ip);
-	sntp_setoperatingmode(SNTP_OPMODE_POLL);
-	sntp_init();
+
 	HAL_TIM_Base_Start_IT(&htim2);
-	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-	//__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_3,9999);
+	if (MODE == Efector)HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
 	while (1) {
 		MX_LWIP_Process();
-
+		if (mqtt_client_is_connected(client)) {
+			HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
+		}else HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
