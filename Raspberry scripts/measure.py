@@ -1,9 +1,10 @@
+#!/usr/bin/python3
 import paho.mqtt.client as mqtt
 import timer
 import time
 
 # Create an MQTT client instance
-client = mqtt.Client()
+client = mqtt.Client("sensors")
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -29,7 +30,7 @@ client.on_message = on_message
 client.connect("192.168.1.33", 1883, 60)
 # Publish a message to the "my/topic" topic
 TIM=timer.Reapeted_Timer(increment = 0.1,callback=timer_callback)
-input("Press Enter to continue...")
-TIM.done=True
-# Disconnect from the MQTT broker
-client.disconnect()
+# input("Press Enter to continue...")
+# TIM.done=True
+# # Disconnect from the MQTT broker
+# client.disconnect()

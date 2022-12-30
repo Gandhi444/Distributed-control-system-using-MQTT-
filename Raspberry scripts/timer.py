@@ -13,7 +13,6 @@ class Reapeted_Timer():
         self.next_t+=self.increment
         if not self.done:
             threading.Timer( self.next_t - time.time(), self._run).start()
-    
     def stop(self):
         self.done=True
 
