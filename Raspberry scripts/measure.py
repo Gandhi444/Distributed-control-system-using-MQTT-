@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 import paho.mqtt.client as mqtt
-import timer
+from timer import Reapeted_Timer
 import time
-
+from smbus2 import SMBus
+from BMP280 import BMP280
 # Create an MQTT client instance
 client = mqtt.Client("sensors")
 
@@ -20,17 +21,18 @@ def on_message(client, userdata, msg):
 def publish_message(topic, payload):
     client.publish(topic, payload)
 def timer_callback():
-    print(time.time())
-    publish_message("test",time.time())
+    publish_message("temp",time.time())
 # Set the callbacks for connecting, receiving messages, and disconnecting
 client.on_connect = on_connect
 client.on_message = on_message
-
 # Connect to the MQTT broker
 client.connect("192.168.1.33", 1883, 60)
+BMP280_inst=BMP280(SMBus(1))
+
+
 # Publish a message to the "my/topic" topic
-TIM=timer.Reapeted_Timer(increment = 0.1,callback=timer_callback)
-# input("Press Enter to continue...")
-# TIM.done=True
-# # Disconnect from the MQTT broker
-# client.disconnect()
+TIM=Reapeted_Timer(Tp = 0.1,callback=timer_callback)
+input("Press Enter to continue...")
+TIM.done=True
+# Disconnect from the MQTT broker
+client.disconnect()

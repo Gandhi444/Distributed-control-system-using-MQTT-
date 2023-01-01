@@ -17,29 +17,27 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print("re")
     q.put(msg)
 
 client.on_connect = on_connect
 client.on_message = on_message
 q=Queue()
 client.connect("192.168.1.33", 1883, 60)
-client.subscribe("test")
+client.subscribe("recive")
 timeout = 1
 i =''
 duty = 0 # [%]
 freq = 500 # [Hz]
 
 # Pin Definitons :
-# pwmPin = 12 #< LED: Physical pin 12, BCM GPIO18
+pwmPin = 12 #< LED: Physical pin 12, BCM GPIO18
 
-# GPIO.setmode(GPIO.BOARD)
-# GPIO.setup(pwmPin , GPIO.OUT)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(pwmPin , GPIO.OUT)
 
-# pwm = GPIO.PWM(pwmPin,freq)
-# pwm.start(duty)
+pwm = GPIO.PWM(pwmPin,freq)
+pwm.start(duty)
 client.loop_start()  #Start loop 
-time.sleep(4)
 try:
     while True:
         # Wait for connection setup to complete
@@ -48,7 +46,7 @@ try:
             if message is None:
                 continue
             print("received from queue",str(message.payload.decode("utf-8")))
-            #pwm.ChangeDutyCycle(str(message.payload.decode("utf-8")))
+            pwm.ChangeDutyCycle(float(message.payload.decode("utf-8")))
 except KeyboardInterrupt:
     print('Koniec')
 pwm.stop()

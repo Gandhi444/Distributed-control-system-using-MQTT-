@@ -2,10 +2,10 @@ import threading
 import time
 
 class Reapeted_Timer():
-    def __init__(self, increment,callback):
+    def __init__(self, Tp,callback):
         self.next_t = time.time()
         self.done=False
-        self.increment = increment
+        self.increment = Tp
         self.callback=callback
         self._run()
     def _run(self):
