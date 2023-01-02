@@ -1,8 +1,4 @@
 import paho.mqtt.client as mqtt
-import time
-import sys
-import select
-import numpy
 from queue import Queue
 try :
     import RPi.GPIO as GPIO
@@ -17,13 +13,14 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
+    global q
     q.put(msg)
 
 client.on_connect = on_connect
 client.on_message = on_message
 q=Queue()
-client.connect("192.168.1.33", 1883, 60)
-client.subscribe("recive")
+client.connect("192.168.0.16", 1883, 60)
+client.subscribe("Control")
 timeout = 1
 i =''
 duty = 0 # [%]
@@ -37,17 +34,21 @@ GPIO.setup(pwmPin , GPIO.OUT)
 
 pwm = GPIO.PWM(pwmPin,freq)
 pwm.start(duty)
-client.loop_start()  #Start loop 
+#client.loop_start()  #Start loop 
 try:
     while True:
+        client.loop()
         # Wait for connection setup to complete
         while not q.empty():
             message = q.get()
             if message is None:
                 continue
             print("received from queue",str(message.payload.decode("utf-8")))
+            duty=float(message.payload.decode("utf-8"))
+            duty=max(min(duty, 0), 100)
             pwm.ChangeDutyCycle(float(message.payload.decode("utf-8")))
 except KeyboardInterrupt:
     print('Koniec')
 pwm.stop()
 GPIO.cleanup()
+client.disconnect()
