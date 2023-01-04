@@ -8,6 +8,11 @@
 #ifndef INC_BH1750_H_
 #define INC_BH1750_H_
 
+#define BH1750_ADRESS (0x23 << 1)
+#define BH1750_POWER_ON 0x01
+#define BH1750_CONTINOUS_H_RES_MODE   0x10
+
+
 #include <stdio.h>
 #include "stdbool.h"
 #include "math.h"

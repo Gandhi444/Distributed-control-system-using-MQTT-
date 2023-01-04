@@ -135,12 +135,12 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	ip_addr_t sntp_server_ip;
-		IP4_ADDR(&sntp_server_ip, 162, 159, 200, 1);
-		sntp_setserver(0, &sntp_server_ip);
-		sntp_setoperatingmode(SNTP_OPMODE_POLL);
-		sntp_init();
+	IP4_ADDR(&sntp_server_ip, 162, 159, 200, 1);
+	sntp_setserver(0, &sntp_server_ip);
+	sntp_setoperatingmode(SNTP_OPMODE_POLL);
+	sntp_init();
 	if (MODE == Not_selected
-			&& HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 10, 50) == 0) {
+			&& HAL_I2C_IsDeviceReady(&hi2c1, BMP280_ADRESS, 10, 50) == 0) {
 		__HAL_TIM_SET_AUTORELOAD(&htim2, 499999);
 		BMP280_initDefParams(&BMP280);
 		BMP280_init(&BMP280);
@@ -149,7 +149,7 @@ int main(void)
 		IP_ADDRESS[3] = 5;
 	}
 	if (MODE == Not_selected
-			&& HAL_I2C_IsDeviceReady(&hi2c1, 0x23 << 1, 10, 50) == 0) {
+			&& HAL_I2C_IsDeviceReady(&hi2c1, BH1750_ADRESS, 10, 50) == 0) {
 		__HAL_TIM_SET_AUTORELOAD(&htim2, 19999);
 		BH1750_init(&BH1750);
 		MODE = Light;
@@ -170,13 +170,17 @@ int main(void)
 		example_do_connect(client, sub_on_connect);
 	}
 
-	HAL_TIM_Base_Start_IT(&htim2);
-	if (MODE == Efector)HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+	if (MODE == Efector) {
+		HAL_TIM_Base_Start(&htim2);
+		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+	} else
+		HAL_TIM_Base_Start_IT(&htim2);
 	while (1) {
 		MX_LWIP_Process();
 		if (mqtt_client_is_connected(client)) {
 			HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
-		}else HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
+		} else
+			HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
