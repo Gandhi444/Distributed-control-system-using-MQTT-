@@ -45,7 +45,7 @@ try:
                 continue
             print("received from queue",str(message.payload.decode("utf-8")))
             duty=float(message.payload.decode("utf-8"))
-            duty=max(min(duty, 0), 100)
+            duty=max(0,min(duty, 100))
             pwm.ChangeDutyCycle(float(message.payload.decode("utf-8")))
 except KeyboardInterrupt:
     print('Koniec')

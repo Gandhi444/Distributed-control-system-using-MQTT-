@@ -2,12 +2,12 @@
 import paho.mqtt.client as mqtt
 from timer import Reapeted_Timer
 import time
-#from smbus2 import SMBus
-#from BMP280 import BMP280
+from smbus2 import SMBus
+from BH1750 import BH1750
 import json
 # Create an MQTT client instance
-client = mqtt.Client("test")
-duty=0
+client = mqtt.Client("sensors")
+
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -21,21 +21,20 @@ def on_message(client, userdata, msg):
 def publish_message(topic, payload):
     client.publish(topic, payload)
 def timer_callback():
-    global duty
-   # BMP280_inst.ReadTemp()
+    global BH1750_inst
+    BH1750_inst.ReadLux()
     #print(BMP280_inst.temp)
-    #msg={ "time":time.time(),"temp":BMP280_inst.temp}
-    publish_message("Control",duty)
-    duty=(duty+1)%100
-    print(duty)
+    msg={ "time":time.time(),"temp":BH1750_inst.lux}
+    publish_message("Sensors",json.dumps(msg))
 # Set the callbacks for connecting, receiving messages, and disconnecting
 client.on_connect = on_connect
 client.on_message = on_message
 # Connect to the MQTT broker
-#BMP280_inst=BMP280(SMBus(1))
+BH1750_inst=BH1750(SMBus(1))
+time.sleep(1)
 client.connect("192.168.0.16", 1883, 60)
 # Publish a message to the "my/topic" topic
-TIM=Reapeted_Timer(Tp = 0.1,callback=timer_callback)
+TIM=Reapeted_Timer(Tp = 1,callback=timer_callback)
 input("Press Enter to continue...")
 TIM.done=True
 # Disconnect from the MQTT broker
