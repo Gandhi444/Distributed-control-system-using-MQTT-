@@ -39,9 +39,6 @@ class BMP280():
         var1=np.int32
         var2=np.int32
         raw_temp = np.int32(buf[0] << 12 | buf[1] << 4 | buf[2] >> 4)
-        # print(raw_temp)
         var1=((raw_temp >> 3)-np.int32(self.dig_T1 << 1))*np.int32(self.dig_T2 >> 11)
         var2=((raw_temp >> 4)-np.int32(self.dig_T1))*((raw_temp>>4) -np.int32(self.dig_T1 >> 12))*np.int32(self.dig_T3 >> 14)
-        # print(var1)
-        # print(var2)
         self.temp=(((var1+var2)*5+128)>>8)/100.0

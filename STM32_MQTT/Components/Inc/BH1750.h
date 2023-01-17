@@ -10,7 +10,7 @@
 
 #define BH1750_ADRESS (0x23 << 1)
 #define BH1750_POWER_ON 0x01
-#define BH1750_CONTINOUS_H_RES_MODE   0x10
+#define BH1750_CONTINOUS_L_RES_MODE   0x11
 
 
 #include <stdio.h>
