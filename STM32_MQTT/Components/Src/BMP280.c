@@ -6,37 +6,17 @@
  */
 
 #include "BMP280.h"
-
-void BMP280_initDefParams(BMP280_typedef* BMP280)
-{
-	BMP280->address=BMP280_ADRESS;
-	BMP280->mode=BMP280_MODE_NORMAL;
-	BMP280->filter=BMP280_FILTER_OFF;
-	BMP280->oversampling=BMP280_HIGH_RES;
-	BMP280->standby=BMP280_STANDBY_250;
-	BMP280->hi2c=&hi2c1;
-	return;
-}
-bool write_register8(BMP280_typedef *dev, uint8_t addr, uint8_t value) {
-	uint16_t buf;
-
-	buf = dev->address;
-
-	if (HAL_I2C_Mem_Write(dev->hi2c, buf, addr, 1, &value, 1, 5000) == HAL_OK)
-		return true;
-	else
-		return false;
-}
-
-
 bool BMP280_init(BMP280_typedef* BMP280)
-{	uint8_t buf = (BMP280->standby << 5) | (BMP280->filter << 2);
-	if(!write_register8(BMP280,CONFIG_REG,buf))
+{
+	BMP280->hi2c=&hi2c1;
+	BMP280->address=BMP280_ADRESS;
+	uint8_t buf = (BMP280_STANDBY_250 << 5) | (BMP280_FILTER_2 << 2);
+	if(HAL_I2C_Mem_Write(BMP280->hi2c, BMP280->address, CONFIG_REG, 1, &buf, 1, 5000) != HAL_OK)
 	{
 		return false;
 	}
-	buf=(BMP280->oversampling << 5)| (BMP280->oversampling << 2) | (BMP280->mode);
-	if(!write_register8(BMP280,CTRL_REG,buf))
+	buf=(BMP280_TEMP_OVERSAMPLING << 5)| (BMP280_PRE_OVERSAMPLING << 2) | (BMP280_MODE_NORMAL);
+	if(HAL_I2C_Mem_Write(BMP280->hi2c, BMP280->address, CTRL_REG, 1, &buf, 1, 5000) != HAL_OK)
 	{
 		return false;
 	}
@@ -55,8 +35,6 @@ bool BMP280ReadTempCompensation(BMP280_typedef* BMP280)
 	}
 	return false;
 }
-
-
 bool BMP280ReadTemp(BMP280_typedef* BMP280)
 {
 	uint8_t buf[3];

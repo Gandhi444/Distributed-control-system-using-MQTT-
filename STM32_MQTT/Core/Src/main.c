@@ -142,7 +142,6 @@ int main(void)
 	if (MODE == Not_selected
 			&& HAL_I2C_IsDeviceReady(&hi2c1, BMP280_ADRESS, 10, 50) == 0) {
 		__HAL_TIM_SET_AUTORELOAD(&htim2, 499999);
-		BMP280_initDefParams(&BMP280);
 		BMP280_init(&BMP280);
 		MODE = Temp;
 		sprintf(client_id, "Temp");
