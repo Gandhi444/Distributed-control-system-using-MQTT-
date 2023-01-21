@@ -19,7 +19,7 @@ def on_message(client, userdata, msg):
 client.on_connect = on_connect
 client.on_message = on_message
 q=Queue()
-client.connect("192.168.0.16", 1883, 60)
+client.connect("192.168.0.23", 1883, 60)
 client.subscribe("Control")
 timeout = 1
 i =''

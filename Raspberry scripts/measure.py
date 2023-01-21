@@ -31,9 +31,9 @@ client.on_connect = on_connect
 client.on_message = on_message
 # Connect to the MQTT broker
 BMP280_inst=BMP280(SMBus(1))
-client.connect("192.168.0.16", 1883, 60)
+client.connect("192.168.0.23", 1883, 60)
 # Publish a message to the "my/topic" topic
-TIM=Reapeted_Timer(Tp = 0.1,callback=timer_callback)
+TIM=Reapeted_Timer(Tp = 0.5,callback=timer_callback)
 input("Press Enter to continue...")
 TIM.done=True
 # Disconnect from the MQTT broker
