@@ -21,9 +21,7 @@
 #define TEMP_MSB 0xFA
 #define TEMP_COMP 0x88
 
-
 extern I2C_HandleTypeDef hi2c1;
-
 
 typedef struct {
 	float temp;

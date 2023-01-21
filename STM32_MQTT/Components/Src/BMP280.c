@@ -41,8 +41,6 @@ bool BMP280ReadTemp(BMP280_typedef* BMP280)
 	int32_t raw_temp;
 	if (HAL_I2C_Mem_Read(BMP280->hi2c, BMP280->address, TEMP_MSB, 1, buf, 3, 5000) == HAL_OK)
 	{
-
-
 		int32_t var1, var2;
 		raw_temp = buf[0] << 12 | buf[1] << 4 | buf[2] >> 4;
 		var1 = ((((raw_temp >> 3) - ((int32_t) BMP280->dig_T1 << 1)))* (int32_t) BMP280->dig_T2) >> 11;
