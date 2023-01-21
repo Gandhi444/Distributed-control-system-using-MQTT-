@@ -12,8 +12,7 @@ class BH1750():
         self.addres = BH1750_ADRESS
         self.i2c = i2c_handle
         self.i2c.write_byte(self.addres,BH1750_POWER_ON)
-        self.i2c.write_byte(self.addres,BH1750_CONTINOUS_L_RES_MODE)
+        self.i2c.write_byte(self.addres,BH1750_CONTINOUS_H_RES_MODE)
     def ReadLux(self):
-        data=self.i2c.read_word_data(self.addres,BH1750_CONTINOUS_L_RES_MODE)
-        self.lux=(data >> 8 | (data&0xff)<<8)/1.2/2
-        print(self.lux)
+        data=self.i2c.read_word_data(self.addres,BH1750_CONTINOUS_H_RES_MODE)
+        self.lux=(data >> 8 | (data&0xff)<<8)/1.2
