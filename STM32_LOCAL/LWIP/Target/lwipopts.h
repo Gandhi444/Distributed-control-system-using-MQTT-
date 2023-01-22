@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2022 STMicroelectronics.
+  * Copyright (c) 2023 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -30,10 +30,8 @@
 
 /* Within 'USER CODE' section, code will be kept by default at each generation */
 /* USER CODE BEGIN 0 */
-#define LWIP_DEBUG 0
 #include "sntp_rtc.h"
 #define SNTP_SET_SYSTEM_TIME_US(sec, us) SetRTC(sec,us)
-
 /* USER CODE END 0 */
 
 #ifdef __cplusplus

@@ -386,7 +386,7 @@
   (symbol (lib_id "Transistor_FET:2N7000") (at 54.61 43.18 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 29329e0a-8809-4ca4-b945-9734a0c3cf89)
-    (property "Reference" "Q?" (id 0) (at 60.96 41.9099 0)
+    (property "Reference" "Q1" (id 0) (at 60.96 41.9099 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "2N7000" (id 1) (at 60.96 44.4499 0)
@@ -488,7 +488,7 @@
       (reference "D1") (unit 1) (value "LED") (footprint "")
     )
     (path "/29329e0a-8809-4ca4-b945-9734a0c3cf89"
-      (reference "Q?") (unit 1) (value "2N7000") (footprint "Package_TO_SOT_THT:TO-92_Inline")
+      (reference "Q1") (unit 1) (value "2N7000") (footprint "Package_TO_SOT_THT:TO-92_Inline")
     )
     (path "/c0a86600-d199-4e8a-9a12-c864156662da"
       (reference "R1") (unit 1) (value "220") (footprint "")
