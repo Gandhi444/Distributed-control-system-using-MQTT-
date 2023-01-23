@@ -71,8 +71,8 @@ BH1750_typedef BH1750;
 BMP280_typedef BMP280;
 //char topic[50];
 char client_id[50];
-char sub_on_connect[100];
-enum mode_enum MODE = Not_selected;
+char sub_on_connect[100]="Control";
+enum mode_enum MODE;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -128,6 +128,7 @@ int main(void)
   MX_CRC_Init();
   MX_I2C1_Init();
   MX_RTC_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	client = mqtt_client_new();
   /* USER CODE END 2 */
@@ -139,47 +140,26 @@ int main(void)
 	sntp_setserver(0, &sntp_server_ip);
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
 	sntp_init();
-	if (MODE == Not_selected
-			&& HAL_I2C_IsDeviceReady(&hi2c1, BMP280_ADRESS, 10, 50) == 0) {
+	if (HAL_I2C_IsDeviceReady(&hi2c1, BMP280_ADRESS, 10, 50) == 0) {
 		__HAL_TIM_SET_AUTORELOAD(&htim2, 499999);
 		BMP280_init(&BMP280);
 		MODE = Temp;
 		sprintf(client_id, "Temp");
-		IP_ADDRESS[3] = 5;
 	}
-	if (MODE == Not_selected
-			&& HAL_I2C_IsDeviceReady(&hi2c1, BH1750_ADRESS, 10, 50) == 0) {
-		__HAL_TIM_SET_AUTORELOAD(&htim2, 19999);
+	if (HAL_I2C_IsDeviceReady(&hi2c1, BH1750_ADRESS, 10, 50) == 0) {
+		__HAL_TIM_SET_AUTORELOAD(&htim2, 24999);
 		BH1750_init(&BH1750);
 		MODE = Light;
 		sprintf(client_id, "Light");
-		IP_ADDRESS[3] = 6;
 	}
-	if (MODE == Not_selected) {
-		__HAL_TIM_SET_AUTORELOAD(&htim2, 19999);
-		sprintf(sub_on_connect, "Control");
-		sprintf(client_id, "Effectors");
-		IP_ADDRESS[3] = 7;
-		MODE = Efector;
-	}
-	IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2],
-			IP_ADDRESS[3]);
-	netif_set_addr(&gnetif, &ipaddr, &netmask, &gw);
 	if (client != NULL) {
 		example_do_connect(client, sub_on_connect);
 	}
-
-	if (MODE == Efector) {
-		HAL_TIM_Base_Start(&htim2);
-		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-	} else
+		HAL_TIM_Base_Start(&htim3);
+		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 		HAL_TIM_Base_Start_IT(&htim2);
 	while (1) {
 		MX_LWIP_Process();
-		if (mqtt_client_is_connected(client)) {
-			HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
-		} else
-			HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

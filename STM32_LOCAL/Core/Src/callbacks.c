@@ -25,6 +25,7 @@ time_t rawtime;
 double combined_time;
 float duty=0;
 float SetpointLight=100;
+float SetpointTemp=21;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	//HAL_GPIO_WritePin(Osciloscope_GPIO_Port, Osciloscope_Pin, GPIO_PIN_SET);
 	uint16_t len = 0;
@@ -35,7 +36,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 			BMP280ReadTemp(&BMP280);
 			GetRTC(&rawtime, &miliseconds);
-			duty=PIDCall(&PID, 23, BMP280.temp);
+			duty=PIDCall(&PID, SetpointTemp, BMP280.temp);
 			__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1,__HAL_TIM_GET_AUTORELOAD(&htim3)*duty/100);
 			combined_time=rawtime+miliseconds;
 			len = sprintf(buf, "{\"s\":%d,\"ms\":%f, \"temp\":%.2f,\"u\":%f} \n\r",rawtime,miliseconds, BMP280.temp,duty);

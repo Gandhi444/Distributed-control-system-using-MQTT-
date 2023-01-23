@@ -112,7 +112,7 @@ int main(void)
 			__HAL_TIM_SET_AUTORELOAD(&htim2, 499999);
 			BMP280_init(&BMP280);
 			MODE = Temp;
-			PIDInit(&PID, 0, 0, 0, 0.5, 0, 0);
+			PIDInit(&PID,371.248,1.95,0,0.5,1.015,0.1);
 		}
 	if (HAL_I2C_IsDeviceReady(&hi2c1, BH1750_ADRESS, 10, 50) == 0) {
 			__HAL_TIM_SET_AUTORELOAD(&htim2, 150149);
