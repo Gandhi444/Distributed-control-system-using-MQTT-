@@ -30,6 +30,7 @@
 #include "lwip/apps/sntp.h"
 #include "BH1750.h"
 #include "BMP280.h"
+#include "PID.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,6 +52,7 @@
 /* USER CODE BEGIN PV */
 BH1750_typedef BH1750;
 BMP280_typedef BMP280;
+PID_typedef PID;
 enum mode_enum MODE;
 uint16_t len = 0;
 /* USER CODE END PV */
@@ -107,21 +109,28 @@ int main(void)
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
 	sntp_init();
 	if (HAL_I2C_IsDeviceReady(&hi2c1, BMP280_ADRESS, 10, 50) == 0) {
-			__HAL_TIM_SET_AUTORELOAD(&htim1, 499999);
+			__HAL_TIM_SET_AUTORELOAD(&htim2, 499999);
 			BMP280_init(&BMP280);
 			MODE = Temp;
+			PIDInit(&PID, 0, 0, 0, 0.5, 0, 0);
 		}
 	if (HAL_I2C_IsDeviceReady(&hi2c1, BH1750_ADRESS, 10, 50) == 0) {
-			__HAL_TIM_SET_AUTORELOAD(&htim1, 19999);
+			__HAL_TIM_SET_AUTORELOAD(&htim2, 150149);
 			BH1750_init(&BH1750);
 			MODE = Light;
+			PIDInit(&PID,0.08,0.3,0,0.15,1.5,0);
 		}
+	HAL_TIM_Base_Start(&htim3);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	HAL_TIM_Base_Start_IT(&htim2);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  MX_LWIP_Process();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
