@@ -147,7 +147,7 @@ int main(void)
 		sprintf(client_id, "Temp");
 	}
 	if (HAL_I2C_IsDeviceReady(&hi2c1, BH1750_ADRESS, 10, 50) == 0) {
-		__HAL_TIM_SET_AUTORELOAD(&htim2, 24999);
+		__HAL_TIM_SET_AUTORELOAD(&htim2, 150149);
 		BH1750_init(&BH1750);
 		MODE = Light;
 		sprintf(client_id, "Light");
