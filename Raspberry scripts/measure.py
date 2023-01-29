@@ -24,7 +24,7 @@ def timer_callback():
     global BMP280_inst
     BMP280_inst.ReadTemp()
     #print(BMP280_inst.temp)
-    msg={ "time":time.time(),"temp":BMP280_inst.temp}
+    msg={ "time":time.time(),"Temperature":BMP280_inst.temp}
     publish_message("Sensors",json.dumps(msg))
 # Set the callbacks for connecting, receiving messages, and disconnecting
 client.on_connect = on_connect

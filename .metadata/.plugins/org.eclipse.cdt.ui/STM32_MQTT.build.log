@@ -1,0 +1,41 @@
+14:31:44 **** Incremental Build of configuration Debug for project STM32_MQTT ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/callbacks.c" -mcpu=cortex-m7 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F756xx -c -I../Core/Inc -I../Components/Inc -I../Drivers/STM32F7xx_HAL_Driver/Inc -I../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F7xx/Include -I../Drivers/CMSIS/Include -I../LWIP/App -I../LWIP/Target -I../Middlewares/Third_Party/LwIP/src/include -I../Middlewares/Third_Party/LwIP/system -I../Drivers/BSP/Components/lan8742 -I../Middlewares/Third_Party/LwIP/src/include/netif/ppp -I../Middlewares/Third_Party/LwIP/src/include/lwip -I../Middlewares/Third_Party/LwIP/src/include/lwip/apps -I../Middlewares/Third_Party/LwIP/src/include/lwip/priv -I../Middlewares/Third_Party/LwIP/src/include/lwip/prot -I../Middlewares/Third_Party/LwIP/src/include/netif -I../Middlewares/Third_Party/LwIP/src/include/compat/posix -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/arpa -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/net -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/sys -I../Middlewares/Third_Party/LwIP/src/include/compat/stdc -I../Middlewares/Third_Party/LwIP/system/arch -I"C:/Users/hpiet/Documents/GitHub/Distributed-control-system-using-MQTT-/STM32_MQTT/Components" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/callbacks.d" -MT"Core/Src/callbacks.o" --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/callbacks.o"
+../Core/Src/callbacks.c: In function 'HAL_TIM_PeriodElapsedCallback':
+../Core/Src/callbacks.c:32:32: warning: format '%d' expects argument of type 'int', but argument 3 has type 'time_t' {aka 'long long int'} [-Wformat=]
+   32 |    len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"Temperature\":%.2f} ",
+      |                               ~^
+      |                                |
+      |                                int
+      |                               %lld
+   33 |      rawtime, miliseconds, BMP280.temp);
+      |      ~~~~~~~                    
+      |      |
+      |      time_t {aka long long int}
+../Core/Src/callbacks.c:46:32: warning: format '%d' expects argument of type 'int', but argument 3 has type 'time_t' {aka 'long long int'} [-Wformat=]
+   46 |    len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"Lux\":%f}",
+      |                               ~^
+      |                                |
+      |                                int
+      |                               %lld
+   47 |      rawtime, miliseconds, BH1750.Iluminance);
+      |      ~~~~~~~                    
+      |      |
+      |      time_t {aka long long int}
+../Core/Src/callbacks.c:25:11: warning: variable 'len' set but not used [-Wunused-but-set-variable]
+   25 |  uint16_t len = 0;
+      |           ^~~
+arm-none-eabi-gcc -o "STM32_MQTT.elf" @"objects.list"   -mcpu=cortex-m7 -T"C:\Users\hpiet\Documents\GitHub\Distributed-control-system-using-MQTT-\STM32_MQTT\STM32F756ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32_MQTT.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: STM32_MQTT.elf
+ 
+arm-none-eabi-size   STM32_MQTT.elf 
+arm-none-eabi-objdump -h -S  STM32_MQTT.elf  > "STM32_MQTT.list"
+   text	   data	    bss	    dec	    hex	filename
+ 135008	   1040	  43200	 179248	  2bc30	STM32_MQTT.elf
+Finished building: default.size.stdout
+ 
+Finished building: STM32_MQTT.list
+ 
+
+14:31:49 Build Finished. 0 errors, 3 warnings. (took 4s.351ms)
+

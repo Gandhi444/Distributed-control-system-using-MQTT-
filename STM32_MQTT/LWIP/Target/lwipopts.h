@@ -32,10 +32,6 @@
 /* USER CODE BEGIN 0 */
 #define LWIP_DEBUG 0
 #include "sntp_rtc.h"
-//void print_debug(const uint8_t *pData)
-//{
-//	HAL_UART_Transmit(&huart3, pData, len, 1000);
-//}
 #define SNTP_SET_SYSTEM_TIME_US(sec, us) SetRTC(sec,us)
 
 /* USER CODE END 0 */
@@ -86,6 +82,8 @@
 #define RECV_BUFSIZE_DEFAULT 2000000000
 /*----- Default Value for LWIP_SNTP: 0 ---*/
 #define LWIP_SNTP 1
+/*----- Default Value for SNTP_MAX_SERVERS: 1 ---*/
+#define SNTP_MAX_SERVERS 4
 /*----- Value in opt.h for LWIP_STATS: 1 -----*/
 #define LWIP_STATS 0
 /*----- Value in opt.h for CHECKSUM_GEN_IP: 1 -----*/

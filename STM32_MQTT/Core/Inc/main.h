@@ -36,7 +36,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-enum mode_enum{Not_selected,Light,Temp,Efector};
+enum mode_enum{Light,Temp};
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

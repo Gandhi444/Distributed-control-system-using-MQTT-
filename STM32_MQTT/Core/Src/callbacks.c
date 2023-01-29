@@ -27,17 +27,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM2) {
 		switch (MODE) {
 		case Temp: {
-
 			BMP280ReadTemp(&BMP280);
 			GetRTC(&rawtime, &miliseconds);
-			len = sprintf(buf, "{\"s\":%ld, \"ms\":%f, \"temp\":%.2f} \n",
+			len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"Temperature\":%.2f} ",
 					rawtime, miliseconds, BMP280.temp);
 //			len = sprintf(buf,"%f} \n",
 //					BMP280.temp);
 			if (mqtt_client_is_connected(client)) {
 				example_publish(client, "Sensors", buf);
 			}
-
 			//len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f temp=%f\n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds,BMP280.temp);
 			//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 			break;
@@ -45,7 +43,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		case Light: {
 			BH1750_ReadIlluminance_lux(&BH1750);
 			GetRTC(&rawtime, &miliseconds);
-			len = sprintf(buf, "{\"s\":%lld, \"ms\":%f, \"Luminance\":%f} \n",
+			len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"Lux\":%f}",
 					rawtime, miliseconds, BH1750.Iluminance);
 			if (mqtt_client_is_connected(client)) {
 				example_publish(client, "Sensors", buf);
@@ -54,24 +52,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 			//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 			break;
 		}
-		case Efector: {
-			if (i == 100) {
-				int compare = __HAL_TIM_GET_COMPARE(&htim2, TIM_CHANNEL_3);
-				len = sprintf(buf, "compare: %d \n\r", compare);
-				HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
-				i = 0;
-			}
-			i++;
-			break;
-		}
-		case Not_selected:
-		{
-			if (i == 100) {
-			len = sprintf(buf, "somthing went wrong\n\r");
-			HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
-			i=0;
-			}i++;
-		}
+
 
 		}
 	}
