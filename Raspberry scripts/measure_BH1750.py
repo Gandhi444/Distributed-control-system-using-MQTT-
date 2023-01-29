@@ -24,7 +24,7 @@ def timer_callback():
     global BH1750_inst
     BH1750_inst.ReadLux()
     #print(BMP280_inst.temp)
-    msg={ "time":time.time(),"temp":BH1750_inst.lux}
+    msg={ "time":time.time(),"lux":BH1750_inst.lux}
     publish_message("Sensors",json.dumps(msg))
 # Set the callbacks for connecting, receiving messages, and disconnecting
 client.on_connect = on_connect

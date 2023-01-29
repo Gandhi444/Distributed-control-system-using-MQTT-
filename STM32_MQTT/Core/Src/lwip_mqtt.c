@@ -140,7 +140,7 @@ void example_publish(mqtt_client_t *client, const char *topic,void *arg )
 {
   const char *pub_payload= arg;
   err_t err;
-  u8_t qos = 2;
+  u8_t qos = 0;
   u8_t retain = 0;
   err = mqtt_publish(client, topic, pub_payload, strlen(pub_payload), qos, retain, mqtt_pub_request_cb, arg);
   if(err != ERR_OK) {

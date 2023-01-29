@@ -29,7 +29,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		case Temp: {
 			BMP280ReadTemp(&BMP280);
 			GetRTC(&rawtime, &miliseconds);
-			len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"temp\":%.2f} \n",
+			len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"Temperature\":%.2f} ",
 					rawtime, miliseconds, BMP280.temp);
 //			len = sprintf(buf,"%f} \n",
 //					BMP280.temp);
@@ -43,7 +43,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		case Light: {
 			BH1750_ReadIlluminance_lux(&BH1750);
 			GetRTC(&rawtime, &miliseconds);
-			len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"temp\":%f} \n",
+			len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"Lux\":%f}",
 					rawtime, miliseconds, BH1750.Iluminance);
 			if (mqtt_client_is_connected(client)) {
 				example_publish(client, "Sensors", buf);
