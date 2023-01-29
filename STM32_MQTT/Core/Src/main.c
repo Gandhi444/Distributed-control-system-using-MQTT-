@@ -78,14 +78,6 @@ enum mode_enum MODE;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-//#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-//PUTCHAR_PROTOTYPE {
-//	/* Place your implementation of fputc here */
-//	/* e.g. write a character to the USART1 and Loop until the end of transmission */
-//	HAL_UART_Transmit(&huart3, (uint8_t*) &ch, 1, 0xFFFF);
-//
-//	return ch;
-//}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -153,7 +145,7 @@ int main(void)
 		sprintf(client_id, "Light");
 	}
 	if (client != NULL) {
-		example_do_connect(client, sub_on_connect);
+		mqtt_do_connect(client, sub_on_connect);
 	}
 		HAL_TIM_Base_Start(&htim3);
 		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);

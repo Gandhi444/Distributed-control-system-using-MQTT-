@@ -31,13 +31,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 			GetRTC(&rawtime, &miliseconds);
 			len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"Temperature\":%.2f} ",
 					rawtime, miliseconds, BMP280.temp);
-//			len = sprintf(buf,"%f} \n",
-//					BMP280.temp);
 			if (mqtt_client_is_connected(client)) {
-				example_publish(client, "Sensors", buf);
+				mqtt_do_publish(client, "Sensors", buf);
 			}
-			//len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f temp=%f\n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds,BMP280.temp);
-			//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 			break;
 		}
 		case Light: {
@@ -46,10 +42,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 			len = sprintf(buf, "{\"s\":%d, \"ms\":%f, \"Lux\":%f}",
 					rawtime, miliseconds, BH1750.Iluminance);
 			if (mqtt_client_is_connected(client)) {
-				example_publish(client, "Sensors", buf);
+				mqtt_do_publish(client, "Sensors", buf);
 			}
-			//len=sprintf(buf,"h:%d,m:%d,s:%d ms:%f temp=%f\n\r",RTC_time.Hours,RTC_time.Minutes,RTC_time.Seconds,miliseconds,BMP280.temp);
-			//HAL_UART_Transmit(&huart3, (uint8_t*) buf, len, 1000);
 			break;
 		}
 
